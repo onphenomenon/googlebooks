@@ -1,0 +1,83 @@
+<head>
+  <meta charset="utf-8">
+  <title>Book Lists!</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="Karianne Burns">
+
+</head>
+<body class="container">
+
+ <div class="row">
+    <div class="col-lg-12">
+      <h1 class="text-center">Create Book Lists</h1>
+      <p class="text-center">Create personalized books lists with Google Books API</p>
+    </div>
+  </div>
+
+ <div class="row">
+    <div class="col-sm-12">
+      <% if (!user) { %>
+        <h2>Welcome! Please log in.</h2>
+        <a href="/auth/google">Sign In with Google</a>
+      <% } else { %>
+        <!-- <img style="-webkit-user-select: none" src="[%= user.photos[0].value %]"/> -->
+        <h2>Hello, <%= user.displayName %>.</h2>
+      <% } %>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-sm-4">
+      <% include ../partials/lists %>
+    </div>
+    <div class="col-sm-4">
+      <% include ../partials/books %>
+    </div>
+    <div class="col-sm-4">
+       <% include ../partials/search %>
+    </div>
+    <ul id="results">
+    </ul>
+    </div>
+
+
+  </div>
+
+</body>
+<script type="text/javascript" >
+  //handler for googleapi
+  var booksearch = function(query){
+      var script = document.createElement("script");
+        script.src = 'https://www.googleapis.com/books/v1/volumes?q='
+          + encodeURIComponent(query) + '&filter=partial'
+          + '&callback=handleResults';
+        script.type = "text/javascript";
+        document.getElementsByTagName("head")[0].appendChild(script);
+
+  }
+
+  function handleResults(root) {
+  // Find the identifier of the first embeddable match
+  // If none found, report an error
+  var entries = root.items || [];
+  var ul = document.getElementById('results')
+
+    for (var i = 0; i < entries.length; ++i) {
+      var entry = entries[i];
+      console.log(entry);
+      var newLi = document.createElement('li');
+      var title = document.createTextNode(entry.volumeInfo.title +" by "+ entry.volumeInfo.authors[0] );
+      newLi.appendChild(title);
+      // newLi.addEventListener('click', addToList(), false);
+      ul.appendChild(newLi);
+
+    }
+
+    showStatus('Could not find a match');
+  }
+
+</script>
+
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+<script type="text/javascript" src="//www.google.com/jsapi"></script>

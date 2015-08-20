@@ -1,0 +1,9 @@
+<ul class="list-unstyled">
+    <% if (!lists) { %>
+      <li ><a href="#"><h5>NO Lists!</h5></a></li>
+    <% } else { %>
+      <% for(var i = 0; i < lists.length; i++) {%>
+      <li ><a href="/auth/google/<%= lists[i].attributes.list_id %>"><h5><%= lists[i].attributes.name %></h5></a></li>
+      <% } %>
+    <% } %>
+</ul>

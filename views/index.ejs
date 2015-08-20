@@ -1,0 +1,185 @@
+<head>
+  <meta charset="utf-8">
+  <title>Book Lists!</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="Karianne Burns">
+
+</head>
+<body class="container">
+  <div class="row">
+    <div class="col-lg-12">
+      <h1 class="text-center">Create Book Lists</h1>
+      <p class="text-center">Create personalized books lists with Google Books API</p>
+    </div>
+  </div>
+
+ <div class="row">
+  <div class="col-sm-12">
+    <% if (!user) { %>
+      <h2>Welcome! Please log in.</h2>
+      <a href="/auth/google">Sign In with Google</a>
+    <% } else { %>
+      <!-- <img style="-webkit-user-select: none" src="[%= user.photos[0].value %]"/> -->
+      <h2>Hello, <%= user.displayName %>.</h2>
+    <% } %>
+  </div>
+  </div>
+<div class="row">
+  <div class="col-sm-4">
+    <form action="newList" method="post">
+      <label for="list"><h4> Create New List </h4></label>
+      <input id="list" type="text" name="list">
+      <input type="submit" value="Save">
+    </form>
+    <!-- <p>Must be signed in.</p> -->
+    <a href="/auth/google/lists">MY LISTS</a>
+
+ <!--      <div id="navcontainer">
+        <ul id="navlist">
+          <li id="active"><a href="#" id="current">Item one</a>
+            <ul id="subnavlist">
+              <li id="subactive"><a href="#" id="subcurrent">Subitem one</a></li>
+              <li><a href="#">Subitem two</a></li>
+              <li><a href="#">Subitem three</a></li>
+              <li><a href="#">Subitem four</a></li>
+            </ul>
+          </li>
+          <li><a href="#">Item two</a></li>
+          <li><a href="#">Item three</a></li>
+          <li><a href="#">Item four</a></li>
+        </ul>
+      </div> -->
+
+    <ul class="list-unstyled">
+      <% if (!lists) { %>
+        <li ><a href="#"><h5>NO Lists!</h5></a></li>
+      <% } else { %>
+        <% for(var i = 0; i < lists.length; i++) {%>
+        <li ><a href="/auth/google/<%= lists[i].attributes.list_id %>"><h5><%= lists[i].attributes.name %></h5></a></li>
+        <% } %>
+      <% } %>
+    </ul>
+  </div>
+  <div class="col-sm-4">
+
+    <!-- <h4>BOOKS</h4>
+    <ul class="list-unstyled">
+      <% if (!books) { %>
+        <li role="presentation"><a role="menuitem" tabindex="-1" href="#"><h5>NO Books!</h5></a></li>
+      <% } else { %>
+        <% for(var i = 0; i < books.length; i++) {%>
+
+        <li role="presentation"><a role="menuitem" tabindex="-1" ><h5><%= books[i].attributes.name %></h5></a></li>
+        <% } %>
+      <% } %>
+    </ul> -->
+
+  </div>
+  <div class="col-sm-4">
+    <form onsubmit="booksearch(this.query.value); return false;"
+              method="get">
+        <label for="list"><h4> Search for Books </h4></label>
+        <input type="text" size="30" name="query" value="Pride and Prejudice"/>
+        <input type="submit" value="Go!"/>
+    </form>
+    <div>
+      <ul id="results">
+      </ul>
+    </div>
+  </div>
+ </div>
+
+
+
+
+</body>
+
+
+
+<script type="text/javascript" >
+  //handler for googleapi
+  var booksearch = function(query){
+      var script = document.createElement("script");
+        script.src = 'https://www.googleapis.com/books/v1/volumes?q='
+          + encodeURIComponent(query) + '&filter=partial'
+          + '&callback=handleResults';
+        script.type = "text/javascript";
+        document.getElementsByTagName("head")[0].appendChild(script);
+
+  }
+
+  function handleResults(root) {
+  // Find the identifier of the first embeddable match
+  // If none found, report an error
+  var entries = root.items || [];
+  var ul = document.getElementById('results')
+
+    for (var i = 0; i < entries.length; ++i) {
+      var entry = entries[i];
+      console.log(entry);
+      var newLi = document.createElement('li');
+      var title = document.createTextNode(entry.volumeInfo.title +" by "+ entry.volumeInfo.authors[0] );
+      newLi.appendChild(title);
+      // newLi.addEventListener('click', addToList(), false);
+      ul.appendChild(newLi);
+
+    }
+
+    showStatus('Could not find a match');
+  }
+
+</script>
+
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+<script type="text/javascript" src="//www.google.com/jsapi"></script>
+<style type="text/css">
+/*ul
+{
+    list-style-type: none;
+    padding:0; margin:0;
+}*/
+/* basic elements */
+.col-centered{
+    float: none;
+    margin: 0 auto;
+}
+body { padding-top:50px; }
+/* Nav LISTS */
+#navlist
+{
+padding: 3px;
+border: 1px solid #fff;
+width: 12em;
+background-color: #26a;
+font: 12px verdana,sans-serif;
+}
+
+#navlist li
+{
+list-style: none;
+border: 1px solid #26a;
+}
+
+#navlist a
+{
+color: #eee;
+text-decoration: none;
+display: block;
+border-left: 1em solid #159;
+border-bottom: 1px solid #159;
+padding: 4px 8px;
+}
+
+#navlist a:hover { border-color: #124; }
+
+#subnavlist li a
+{
+border: 0;
+border-left: 0.8em solid #26a;
+padding: 3px 4px;
+margin-left: -20px;
+}
+</style>
+
+
