@@ -5,7 +5,7 @@ var morgan = require('morgan'),
  passport = require('passport'),
  cookieParser = require('cookie-parser'),
  bodyParser  = require('body-parser'),
- keys = require('../config.js'),
+ //keys = require('../.ebextensions/app.config'),
  db = require('../mySQL.js');
  cors = require('express-cors');
 

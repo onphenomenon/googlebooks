@@ -2,9 +2,9 @@
   "name": "Karianne",
   "version": "1.0.0",
   "description": "Oomai!!",
-  "main": "app.js",
+  "main": "server.js",
   "scripts": {
-    "test": "node app.js"
+    "test": "node server.js"
   },
   "author": "",
   "license": "ISC",

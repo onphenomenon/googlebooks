@@ -94,10 +94,9 @@
       <table class="table table-hover" id="results">
       </table>
 
+    </div>
+    <div class="baseurl" title="http://<%= ip %>:<%= port %>"><h2><%= ip %></h2><h2><%= port %></h2></div>
   </div>
-</div>
-
-
 </body>
 <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 <script type="text/javascript" src="//www.google.com/jsapi"></script>
@@ -151,9 +150,10 @@
   }
 
   var removeBook = function(id, list_id) {
+    var baseurl = $('.baseurl').attr('title');
     $.ajax({
         type: 'DELETE',
-        url: 'http://127.0.0.1:3000/auth/google/'+list_id+"/"+id,
+        url: baseurl+'/auth/google/'+list_id+"/"+id,
         contentType: 'application/json',
         success: function(resp){
           console.log("sucess deleting book  ", resp);
