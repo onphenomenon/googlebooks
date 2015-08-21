@@ -76,12 +76,16 @@ module.exports = function(app, express) {
 
     List.forge({name: newlist, google_id: google_id }).save().then(function(list){
       console.log("New list saved ", newlist);
+
+     Lists.reset().query('where', 'google_id', '=', req.user.id).fetch().then(function(lists) {
+        console.log("personal lits", lists.models);
+       res.render('lists', { user: req.user, lists: lists.models });
+      });
+
+
+
     });
 
-   Lists.reset().query('where', 'google_id', '=', req.user.id).fetch().then(function(lists) {
-      console.log("personal lits", lists.models);
-     res.render('lists', { user: req.user, lists: lists.models });
-    });
 
   });
   //Delete List Resource
@@ -112,31 +116,45 @@ module.exports = function(app, express) {
             console.log("personal books", books.models);
             var books = books.models;
             // res.send(200, links.models);
-            res.send(books.models);
+            res.jsonp(books);
+            // res.send(books.models);
       });
 
   });
   // add books to a list
   app.post('/auth/google/:list', oAuthController.ensureAuthenticated, function(req, res) {
     var book = req.body
-    console.log("BOOK IS ", book);
-    Book.forge({ list_id: req.params.list, title: book[0], author: book[1] }).save().then(function(book){
-      console.log("New book saved ", book);
-    });
-    //send back new book list data;
-    Books.reset().query('where', 'list_id', '=', req.params.list).fetch().then(function(books) {
-            console.log("personal books", books.models);
-            var books = books.models;
-            // res.send(200, links.models);
-            res.send(books.models);
-    });
+    var id = req.params.list;
 
+    console.log("BOOK IS ", book);
+    //res.jsonp("HEELLLOOOO");
+    Book.forge({ list_id: id, title: book[0], author: book[1] }).save().then(function(book){
+      console.log("New book saved ", book, id);
+      res.send(id);
+    })
 
   })
 
 
   //delete books from a list
+  app.delete('/auth/google/:list/:id', oAuthController.ensureAuthenticated, function(req, res) {
+    var list = req.params.list;
+    var id = req.params.id;
 
+    console.log("BOOK IS ", id);
+    new Book({ book_id: id } ).destroy().then(function(){
+      console.log("Book DELETEDDDDDDED")
+    });
+
+    Books.reset().query('where', 'list_id', '=', req.params.list).fetch().then(function(books) {
+            //console.log("personal books", books.models);
+            var books = books.models;
+            // res.send(200, links.models);
+            res.jsonp(books);
+            // res.send(books.models);
+    });
+
+  })
   //
 
 

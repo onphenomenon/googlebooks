@@ -54,7 +54,7 @@
 
 <div class="row">
     <div class="col-sm-4">
-    <h3>Choose list to add books</h3>
+    <h3>Click list to add books</h3>
      <table class="table table-hover">
         <% if (!lists) { %>
           <tr>
@@ -63,7 +63,11 @@
         <% } else { %>
           <% for(var i = 0; i < lists.length; i++) {%>
           <tr>
-            <td ><h5 class="chooselist" title="<%= lists[i].attributes.list_id %>"><%= lists[i].attributes.list_id %><%= lists[i].attributes.name %></h5></td>
+            <td>
+              <button type="button" class="remove btn btn-default btn-md">
+                <h5 class="chooselist" title="<%= lists[i].attributes.list_id %>"><%= lists[i].attributes.name %></h5>
+              </button>
+            </td>
             <td>
               <a type="button" class="remove btn btn-default btn-sm" href="/auth/google/<%= lists[i].attributes.list_id %>/delete">
                 <span class="glyphicon glyphicon-remove" aria-hidden="true">
@@ -84,7 +88,7 @@
   </div>
 
   <div class="col-sm-4">
-    <h3>Add Books</h3>
+    <h3>Click Book to add to List</h3>
 
 
       <table class="table table-hover" id="results">
@@ -100,7 +104,7 @@
 <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 
 <script type="text/javascript" >
-  //choose list
+  //choose list event handler, calls loadBooks for list id
   $('.chooselist').on("click", function(event) {
     console.log(event);
     var id = $(event.target).attr("title");
@@ -112,49 +116,66 @@
     $('.mylist').append(element);
     loadBooks(id)
   })
-  //ajax call for books in a list
-  //render book list
-  var displayBooks = function(books){
-      console.log("trying to display books", books);
-
-  }
-      //var table = $('#books');
-
-      // for (var i = 0; i < entries.length; ++i) {
-      //   var newtr = $('<tr></tr>')
-      //   var title = $('<td></td>').text(entry.volumeInfo.title);;
-      //   var author = $('<td></td>').text(" by "+ entry.volumeInfo.authors[0] );
-      //   newtr.append(title, author);
-      //   table.append(newtr);
-      // }
-
-  //when you click list, it the title appears in next column along with associated books
 
   //ajax call for books in that list
   var loadBooks = function(id) {
-    $getJSON('http://127.0.0.1:3000/auth/google/'+id, function(jsonp){
-      console.log(JSON.stringify(jsonp, null, 2));
+    console.log("jsonp request ");
+    $.getJSON('http://127.0.0.1:3000/auth/google/'+id, function(jsonp){
+      displayBooks(jsonp);
     })
-    // $.ajax({
-    //     type: 'GET',
-    //     url: 'http://127.0.0.1:3000/auth/google/'+id,
-    //     contentType: 'application/json',
-    //     success: function(json){
-    //       console.log("trying to get books")
-    //       displayBooks(json.results);
-    //     }
+  };
 
-    //   });
+  //render book list
+  var displayBooks = function(books){
+      console.log("trying to display books", books);
+      var table = $('#books').empty();
+
+      for (var i = 0; i < books.length; ++i) {
+        var newtr = $('<tr></tr>')
+        var title = $('<td></td>').text(books[i].title);;
+        var author = $('<td></td>').text(books[i].author);
+        var button = $('<td><button type="button" class="remove btn btn-default btn-sm"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button></td>');
+        newtr.append(title, author, button);
+
+        button.bind('click', {id: books[i].book_id, list_id: books[i].list_id }, function(event){
+          var data = event.data;
+          console.log(data);
+          console.log("ID is ", data.id);
+          console.log("LIST ID is ", data.list_id)
+          removeBook(data.id, data.list_id);
+        })
+
+        table.append(newtr);
+      }
+
   }
+
+  var removeBook = function(id, list_id) {
+    $.ajax({
+        type: 'DELETE',
+        url: 'http://127.0.0.1:3000/auth/google/'+list_id+"/"+id,
+        contentType: 'application/json',
+        success: function(resp){
+          console.log("sucess deleting book  ", resp);
+          displayBooks(resp);
+
+
+        }
+      });
+  }
+
+  //when you click list, it the title appears in next column along with associated books
   //add book to list
   var addBook = function(title, author, id) {
+    var id = id;
     $.ajax({
         type: 'POST',
         url: 'http://127.0.0.1:3000/auth/google/'+id,
         data: JSON.stringify([title, author]),
         contentType: 'application/json',
         success: function(id){
-          console.log("sucess asking for books ");
+          console.log("sucess posting book  ");
+          console.log("trying to loat list ", id);
           //do an ajax get request!~
           loadBooks(id);
 
@@ -170,6 +191,7 @@
 
   //handler for googleapi
   var booksearch = function(query){
+    console.log(query)
       var script = document.createElement("script");
         script.src = 'https://www.googleapis.com/books/v1/volumes?q='
           + encodeURIComponent(query) + '&filter=partial'
@@ -183,12 +205,15 @@
   // Find the identifier of the first embeddable match
   // If none found, report an error
   var entries = root.items || [];
+  console.log(entries);
   var table = $('#results');
+  table.empty();
 
     for (var i = 0; i < entries.length; ++i) {
+      console.log('HEREERE')
       var entry = entries[i];
       var bookTitle = entry.volumeInfo.title;
-      var bookAuthor = entry.volumeInfo.authors[0];
+      var bookAuthor = entry.volumeInfo.authors !== undefined ? entry.volumeInfo.authors[0] : "";
       //console.log(entry);
       var newtr = $('<tr></tr>')
       var title = $('<td></td>').text(bookTitle);;
@@ -198,29 +223,19 @@
       newtr.bind('click', {title: title, author: author}, function(event){
         //console.log(event.target.text())
         var data = event.data;
+        console.log(event.target);
+        console.log(this);
        // $("event.target:first-child").text();
         var id = $('.listChoice').attr("title");
         console.log("ID is ", id)
         console.log("trying to add", data.title[0].childNodes[0].data, data.author[0].childNodes[0].data, id)
         addBook(data.title[0].childNodes[0].data, data.author[0].childNodes[0].data, id);
+       $(this).remove();
+
       })
       table.append(newtr);
-      // newLi.addEventListener('click', addToList(), false)
-
-    //   $('.chooselist').on("click", function(event) {
-    // console.log(event);
-    // var id = $(event.target).attr("title");
-    // var title = $(event.target).text();
-    // console.log(id, title);
-    // //create new element with title and id:
-    // $('.mylist').children().remove();
-    // var element = $('<h3></h3>').attr({"title": id, "style": "display:inline-block"}).text(title);
-    // $('.mylist').append(element);
-    // loadBooks(id)
-  // })
 
     }
-
 
   }
 

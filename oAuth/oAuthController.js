@@ -13,12 +13,12 @@ var GOOGLE_CLIENT_SECRET = keys.GOOGLE_CLIENT_SECRET;
 //   have a database of user records, the complete Intuit profile is
 //   serialized and deserialized.
 passport.serializeUser(function(user, done) {
-  console.log("Passport Serialize: ", user);
+  //console.log("Passport Serialize: ", user);
   done(null, user);
 });
 
 passport.deserializeUser(function(user, done) {
-  console.log("Passport Deserialize: ", user);
+  //console.log("Passport Deserialize: ", user);
   done(null, user);
 });
 
