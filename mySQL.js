@@ -32,6 +32,7 @@ db.schema.hasTable('books').then(function(exists) {
   if (!exists) {
     db.schema.createTable('books', function (book) {
       book.increments('book_id').primary();
+      book.integer('list_id');
       book.string('title', 255);
       book.string('author', 255);
       book.timestamps();

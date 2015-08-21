@@ -1,0 +1,227 @@
+<head>
+  <meta charset="utf-8">
+  <title>Book Lists!</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="Karianne Burns">
+
+</head>
+
+<body class="container">
+
+     <div class="row">
+        <div class="col-sm-12">
+          <h1 class="text-center">Create Book Lists</h1>
+          <p class="text-center">Create personalized books lists with Google Books API</p>
+      </div>
+
+       <div class="row">
+          <div class="col-sm-12">
+            <% if (!user) { %>
+              <h2>Welcome! Please log in.</h2>
+              <a href="/auth/google">Sign In with Google</a>
+            <% } else { %>
+              <!-- <img style="-webkit-user-select: none" src="[%= user.photos[0].value %]"/> -->
+              <h2>Hello, <%= user.displayName %>.</h2>
+              <!-- <a href="/auth/google/lists">View Books Lists</a> -->
+            <% } %>
+          </div>
+        </div>
+
+
+
+    </div>
+
+
+    <div class="row">
+      <div class="col-sm-6">
+        <form action="newList" method="post">
+          <label for="list"><h4> Create New List </h4></label>
+          <input id="list" type="text" name="list">
+          <input type="submit" value="Save">
+        </form>
+      </div>
+
+       <div class="col-sm-6">
+          <form onsubmit="booksearch(this.query.value); return false;"
+                method="get">
+            <label for="list"><h3> Search for Books </h3></label>
+            <input type="text" size="30" name="query" value="Pride and Prejudice"/>
+            <input type="submit" value="Go!"/>
+          </form>
+        </div>
+    </div>
+
+<div class="row">
+    <div class="col-sm-4">
+    <h3>Choose list to add books</h3>
+     <table class="table table-hover">
+        <% if (!lists) { %>
+          <tr>
+            <td ><a href="#"><h5>NO Lists!</h5></a></td>
+          </tr>
+        <% } else { %>
+          <% for(var i = 0; i < lists.length; i++) {%>
+          <tr>
+            <td ><h5 class="chooselist" title="<%= lists[i].attributes.list_id %>"><%= lists[i].attributes.list_id %><%= lists[i].attributes.name %></h5></td>
+            <td>
+              <a type="button" class="remove btn btn-default btn-sm" href="/auth/google/<%= lists[i].attributes.list_id %>/delete">
+                <span class="glyphicon glyphicon-remove" aria-hidden="true">
+                </span>
+              </a>
+            </td>
+          </tr>
+          <% } %>
+        <% } %>
+      </table>
+    </div>
+
+  <div class="col-sm-4">
+    <h3 class="mylist" style="display:inline-block;margin-right:10px; ">Books in List </h3>
+      <table class="table table-hover" id="books">
+      </table>
+
+  </div>
+
+  <div class="col-sm-4">
+    <h3>Add Books</h3>
+
+
+      <table class="table table-hover" id="results">
+      </table>
+
+  </div>
+</div>
+
+
+</body>
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+<script type="text/javascript" src="//www.google.com/jsapi"></script>
+<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+
+<script type="text/javascript" >
+  //choose list
+  $('.chooselist').on("click", function(event) {
+    console.log(event);
+    var id = $(event.target).attr("title");
+    var title = $(event.target).text();
+    console.log(id, title);
+    //create new element with title and id:
+    $('.mylist').children().remove();
+    var element = $('<h3></h3>').attr({"title": id, "style": "display:inline-block", "class": "listChoice"}).text(title);
+    $('.mylist').append(element);
+    loadBooks(id)
+  })
+  //ajax call for books in a list
+  //render book list
+  var displayBooks = function(books){
+      console.log("trying to display books", books);
+
+  }
+      //var table = $('#books');
+
+      // for (var i = 0; i < entries.length; ++i) {
+      //   var newtr = $('<tr></tr>')
+      //   var title = $('<td></td>').text(entry.volumeInfo.title);;
+      //   var author = $('<td></td>').text(" by "+ entry.volumeInfo.authors[0] );
+      //   newtr.append(title, author);
+      //   table.append(newtr);
+      // }
+
+  //when you click list, it the title appears in next column along with associated books
+
+  //ajax call for books in that list
+  var loadBooks = function(id) {
+    $getJSON('http://127.0.0.1:3000/auth/google/'+id, function(jsonp){
+      console.log(JSON.stringify(jsonp, null, 2));
+    })
+    // $.ajax({
+    //     type: 'GET',
+    //     url: 'http://127.0.0.1:3000/auth/google/'+id,
+    //     contentType: 'application/json',
+    //     success: function(json){
+    //       console.log("trying to get books")
+    //       displayBooks(json.results);
+    //     }
+
+    //   });
+  }
+  //add book to list
+  var addBook = function(title, author, id) {
+    $.ajax({
+        type: 'POST',
+        url: 'http://127.0.0.1:3000/auth/google/'+id,
+        data: JSON.stringify([title, author]),
+        contentType: 'application/json',
+        success: function(id){
+          console.log("sucess asking for books ");
+          //do an ajax get request!~
+          loadBooks(id);
+
+
+        }
+      });
+  }
+
+
+
+
+
+
+  //handler for googleapi
+  var booksearch = function(query){
+      var script = document.createElement("script");
+        script.src = 'https://www.googleapis.com/books/v1/volumes?q='
+          + encodeURIComponent(query) + '&filter=partial'
+          + '&callback=handleResults';
+        script.type = "text/javascript";
+        document.getElementsByTagName("head")[0].appendChild(script);
+
+  }
+
+  function handleResults(root) {
+  // Find the identifier of the first embeddable match
+  // If none found, report an error
+  var entries = root.items || [];
+  var table = $('#results');
+
+    for (var i = 0; i < entries.length; ++i) {
+      var entry = entries[i];
+      var bookTitle = entry.volumeInfo.title;
+      var bookAuthor = entry.volumeInfo.authors[0];
+      //console.log(entry);
+      var newtr = $('<tr></tr>')
+      var title = $('<td></td>').text(bookTitle);;
+      var author = $('<td></td>').text(bookAuthor );
+      newtr.append(title, author);
+
+      newtr.bind('click', {title: title, author: author}, function(event){
+        //console.log(event.target.text())
+        var data = event.data;
+       // $("event.target:first-child").text();
+        var id = $('.listChoice').attr("title");
+        console.log("ID is ", id)
+        console.log("trying to add", data.title[0].childNodes[0].data, data.author[0].childNodes[0].data, id)
+        addBook(data.title[0].childNodes[0].data, data.author[0].childNodes[0].data, id);
+      })
+      table.append(newtr);
+      // newLi.addEventListener('click', addToList(), false)
+
+    //   $('.chooselist').on("click", function(event) {
+    // console.log(event);
+    // var id = $(event.target).attr("title");
+    // var title = $(event.target).text();
+    // console.log(id, title);
+    // //create new element with title and id:
+    // $('.mylist').children().remove();
+    // var element = $('<h3></h3>').attr({"title": id, "style": "display:inline-block"}).text(title);
+    // $('.mylist').append(element);
+    // loadBooks(id)
+  // })
+
+    }
+
+
+  }
+
+</script>

@@ -7,6 +7,7 @@ var morgan = require('morgan'),
  bodyParser  = require('body-parser'),
  keys = require('../config.js'),
  db = require('../mySQL.js');
+ cors = require('express-cors');
 
 module.exports = function(app, express) {
 
@@ -35,6 +36,12 @@ module.exports = function(app, express) {
 
   app.use(passport.initialize());
   app.use(passport.session());
+
+  app.use(cors({
+    allowedOrigins: [
+        'http://127.0.0.1:3000'
+    ]
+}))
 
   app.use(authRouter);
 

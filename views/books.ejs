@@ -1,0 +1,55 @@
+<head>
+  <meta charset="utf-8">
+  <title>Book Lists!</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="Karianne Burns">
+
+</head>
+
+<body class="container">
+
+ <div class="row">
+    <div class="col-lg-12">
+      <h1 class="text-center">Create Book Lists</h1>
+      <p class="text-center">Create personalized books lists with Google Books API</p>
+    </div>
+  </div>
+
+<div class="row">
+  <div class="col-sm-6">
+    <form onsubmit="booksearch(this.query.value); return false;"
+              method="get">
+        <label for="list"><h4> Search for Books </h4></label>
+        <input type="text" size="30" name="query" value="Pride and Prejudice"/>
+        <input type="submit" value="Go!"/>
+    </form>
+  </div>
+  <div class="col-sm-6">
+  <h4><%= list %></h4>
+     <table class="table table-hover">
+         <% if (!books) { %>
+          <tr>
+            <td ><a href="#"><h5>NO Books!</h5></a></td>
+          </tr>
+        <% } else { %>
+          <% for(var i = 0; i < books.length; i++) {%>
+          <tr>
+            <td><a  ><h5><%= books[i].attributes.name %></h5></a></td>
+            <td>
+              <button type="button" class="remove btn btn-default btn-sm">
+                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+
+              </button>
+            </td>
+          </tr>
+          <% } %>
+        <% } %>
+      </table>
+  </div>
+</div>
+
+<div class="row">
+</div>
+</body>
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">

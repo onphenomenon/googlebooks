@@ -4,6 +4,7 @@ var Lists = require('../ORM/listscollection.js');
 var User = require('../ORM/user.js');
 var Book = require('../ORM/book.js');
 var Books = require('../ORM/bookscollection.js');
+
 //Passport for user authentication
 var passport = require('passport');
 module.exports = function(app, express) {
@@ -23,7 +24,7 @@ module.exports = function(app, express) {
           });
         } else {
           var models = undefined;
-          res.render('pages/index', { user: req.user, lists: models, books: books });
+          res.render('lists', { user: req.user, lists: models});
       }
 
 
@@ -45,20 +46,29 @@ module.exports = function(app, express) {
         });
         console.log("Successful LOGIN YAY!");
 
-
-
-
         Lists.reset().query('where', 'google_id', '=', req.user.id).fetch().then(function(lists) {
           console.log("personal lits", lists.models);
           // res.send(200, links.models);
-           var books = undefined;
-          res.render('index', { user: req.user, lists: lists.models, books: books });
+
+          res.render('lists', { user: req.user, lists: lists.models });
         });
 
 
   });
-  //POST new LIST assocated with user. (protected authentication with google oAUTH)
 
+  app.get('/auth/google/lists', oAuthController.ensureAuthenticated, function(req, res) {
+      console.log("________________________________")
+      console.log("HIT ROUTE! ");
+      var google_id = req.user.id;
+      Lists.reset().query('where', 'google_id', '=', req.user.id).fetch().then(function(lists) {
+        console.log("personal lists", lists.models);
+
+        res.render('lists', { user: req.user, lists: lists.models });
+      });
+
+  });
+
+  //POST new LIST assocated with user. (protected authentication with google oAUTH)
   app.post('/auth/google/newList', oAuthController.ensureAuthenticated,
    function(req, res) {
     var google_id = req.user.id;
@@ -70,35 +80,64 @@ module.exports = function(app, express) {
 
    Lists.reset().query('where', 'google_id', '=', req.user.id).fetch().then(function(lists) {
       console.log("personal lits", lists.models);
-      // res.send(200, links.models);
-      var books = undefined;
-     res.render('partials/lists', {  lists: lists.models });
+     res.render('lists', { user: req.user, lists: lists.models });
     });
 
   });
-  //GET USER LISTS
-    app.get('/auth/google/lists', oAuthController.ensureAuthenticated, function(req, res) {
-        console.log("________________________________")
-        console.log("HIT ROUTE! ");
+  //Delete List Resource
+  app.get('/auth/google/:list/delete', oAuthController.ensureAuthenticated, function(req, res) {
+      console.log("________________________________")
+      console.log("HIT BOOKS ROUTE! ");
+      console.log("List_id ", req.params.list );
+      var id = parseInt( req.params.list)
+
+      new List({ list_id: id } ).destroy();
+      //add to delete all books from db with list association.
+
+      Lists.reset().query('where', 'google_id', '=', req.user.id).fetch().then(function(lists) {
+        //console.log("personal lists", lists.models);
+
+        res.render('lists', { user: req.user, lists: lists.models });
+      });
+  });
 
 
-
-    });
   //GET BOOKS FOR A LIST
     app.get('/auth/google/:list', oAuthController.ensureAuthenticated, function(req, res) {
       console.log("________________________________")
       console.log("HIT BOOKS ROUTE! ");
       console.log("LIst_id ", req.params.list );
 
-       Books.reset().query('where', 'list_id', '=', req.params.list).fetch().then(function(books) {
-          console.log("personal books", books.models);
-          // res.send(200, links.models);
-         res.render('index', { user: req.user, lists: lists.models, books: books.models });
-        });
-
+      Books.reset().query('where', 'list_id', '=', req.params.list).fetch().then(function(books) {
+            console.log("personal books", books.models);
+            var books = books.models;
+            // res.send(200, links.models);
+            res.send(books.models);
+      });
 
   });
+  // add books to a list
+  app.post('/auth/google/:list', oAuthController.ensureAuthenticated, function(req, res) {
+    var book = req.body
+    console.log("BOOK IS ", book);
+    Book.forge({ list_id: req.params.list, title: book[0], author: book[1] }).save().then(function(book){
+      console.log("New book saved ", book);
+    });
+    //send back new book list data;
+    Books.reset().query('where', 'list_id', '=', req.params.list).fetch().then(function(books) {
+            console.log("personal books", books.models);
+            var books = books.models;
+            // res.send(200, links.models);
+            res.send(books.models);
+    });
 
+
+  })
+
+
+  //delete books from a list
+
+  //
 
 
   app.get('/userLists', function(req, res){
