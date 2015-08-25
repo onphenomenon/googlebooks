@@ -1,11 +1,10 @@
-#.config for intuit
 config.js
 
 node_modules/
 *.log
 
 # Elastic Beanstalk Files
-./.ebextensions/*
+.ebextensions/*
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
