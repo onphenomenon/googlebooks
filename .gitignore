@@ -4,6 +4,6 @@ node_modules/
 *.log
 
 # Elastic Beanstalk Files
-.ebextensions/app.config
+.ebextensions/*
 .elasticbeanstalk/*
 
