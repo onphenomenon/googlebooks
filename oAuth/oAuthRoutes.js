@@ -8,16 +8,11 @@ var Books = require('../ORM/bookscollection.js');
 //Passport for user authentication
 var passport = require('passport');
 module.exports = function(app, express) {
-  console.log("ippppp", app.ip);
-  console.log("portytttt ", app.port);
+
 
   //root route
   app.get('/login', function(req, res){
-    console.log("ip", app.ip);
-    console.log("port yyyyy", app.get('port'));
-    console.log("index req.session ", req.session);
-    console.log("index req.user ", req.user);
-    console.log("index req.session.passport.user", req.session.passport.user)
+
     var books = undefined;
 
     if(req.user !== undefined) {
@@ -28,9 +23,7 @@ module.exports = function(app, express) {
           });
         } else {
           var models = undefined;
-          console.log("ip", app.ip);
-          console.log("port ", app.port);
-          res.render('lists', { user: req.user, lists: models, ip: app.ip, port: app.port});
+          res.render('lists', { user: req.user, lists: models});
       }
 
 

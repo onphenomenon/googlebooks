@@ -1,9 +1,9 @@
 var passport = require('passport'),
 GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
-var keys = require('../config.js');
+var GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID
+var GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET
 
-var GOOGLE_CLIENT_ID = keys.GOOGLE_CLIENT_ID
-var GOOGLE_CLIENT_SECRET = keys.GOOGLE_CLIENT_SECRET;
+
 
 // Passport session setup.
 //   To support persistent login sessions, Passport needs to be able to

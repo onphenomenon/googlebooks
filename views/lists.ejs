@@ -95,7 +95,6 @@
       </table>
 
     </div>
-    <div class="baseurl" title="http://<%= ip %>:<%= port %>"><h2><%= ip %></h2><h2><%= port %></h2></div>
   </div>
 </body>
 <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
@@ -103,9 +102,9 @@
 <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 
 <script type="text/javascript" >
+console.log("Window host location", window.location.host);
   //choose list event handler, calls loadBooks for list id
   $('.chooselist').on("click", function(event) {
-    console.log(event);
     var id = $(event.target).attr("title");
     var title = $(event.target).text();
     console.log(id, title);
@@ -119,7 +118,7 @@
   //ajax call for books in that list
   var loadBooks = function(id) {
     console.log("jsonp request ");
-    $.getJSON('http://127.0.0.1:3000/auth/google/'+id, function(jsonp){
+    $.getJSON('http://'+window.location.host+'/auth/google/'+id, function(jsonp){
       displayBooks(jsonp);
     })
   };
@@ -138,7 +137,6 @@
 
         button.bind('click', {id: books[i].book_id, list_id: books[i].list_id }, function(event){
           var data = event.data;
-          console.log(data);
           console.log("ID is ", data.id);
           console.log("LIST ID is ", data.list_id)
           removeBook(data.id, data.list_id);
@@ -150,10 +148,10 @@
   }
 
   var removeBook = function(id, list_id) {
-    var baseurl = $('.baseurl').attr('title');
+
     $.ajax({
         type: 'DELETE',
-        url: baseurl+'/auth/google/'+list_id+"/"+id,
+        url: 'http://'+window.location.host+'/auth/google/'+list_id+"/"+id,
         contentType: 'application/json',
         success: function(resp){
           console.log("sucess deleting book  ", resp);
